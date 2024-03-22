@@ -1,0 +1,6 @@
+@Card_Reader_Api_HostAddress = http://localhost:5185
+
+GET {{Card_Reader_Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
