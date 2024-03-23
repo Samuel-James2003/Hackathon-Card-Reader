@@ -2,6 +2,7 @@
 using PokemonTcgSdk.Standard.Infrastructure.HttpClients.Base;
 using PokemonTcgSdk.Standard.Infrastructure.HttpClients.Cards;
 using PokemonTcgSdk.Standard.Infrastructure.HttpClients;
+using Card_Reader_Api.Model;
 
 namespace Card_Reader_Api.Controllers
 {
