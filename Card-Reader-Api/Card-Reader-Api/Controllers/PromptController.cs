@@ -11,6 +11,7 @@ namespace Card_Reader_Api.Controllers
     [Route("[controller]")]
     public class PromptController : ControllerBase
     {
+
         /// <summary>
         /// 
         /// </summary>
@@ -20,10 +21,12 @@ namespace Card_Reader_Api.Controllers
         /// <returns></returns>
         [HttpGet(Name = "test")]
         public async Task<string> ConversationAnalysis(string? conversationHistory, string prompt, string? system)
+
         {
             try
             {
                 var openai = new OpenAIClient(new Uri(Env.URL_OPEN_AI), new Azure.AzureKeyCredential(Env.KEY_OPEN_AI));
+
                 IList<ChatRequestMessage> Messages = [];
                 ChatCompletionsOptions requestOptions = new();
                 if (string.IsNullOrEmpty(conversationHistory))
@@ -73,10 +76,19 @@ namespace Card_Reader_Api.Controllers
                     }
                 }
 
+
                 var response = await openai.GetChatCompletionsAsync(requestOptions);
-                // Extraire la réponse
-                var analysisResult = response.Value.Choices.FirstOrDefault()?.Message?.Content;
-                return analysisResult ?? "Aucune réponse n'a été reçue.";
+
+                // Extraire la réponse si elle est disponible
+                if (response?.Value?.Choices != null && response.Value.Choices.Any())
+                {
+                    var analysisResult = response.Value.Choices.FirstOrDefault()?.Message?.Content;
+                    return analysisResult ?? "Aucune réponse n'a été reçue.";
+                }
+                else
+                {
+                    return "Aucune réponse n'a été reçue.";
+                }
             }
             catch (Exception e)
             {
