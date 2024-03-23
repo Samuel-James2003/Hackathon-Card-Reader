@@ -3,6 +3,7 @@ import axios from 'axios';
 import { ImageResponseContext } from '../context/ImageResponseContext';
 
 const ImageUploader: React.FC = () => {
+    const [isLoading,setIsLoading] = useState<boolean>(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const { setResponseData } = useContext(ImageResponseContext);
 
@@ -14,6 +15,7 @@ const ImageUploader: React.FC = () => {
 
     const handleSubmit = async () => {
         if (selectedFile) {
+            setIsLoading(true);
             const formData = new FormData();
             formData.append('file', selectedFile); // Utilisez l'objet File directement
 
@@ -31,6 +33,8 @@ const ImageUploader: React.FC = () => {
                 });
             } catch (error) {
                 console.error(error);
+            } finally {
+                setIsLoading(false);
             }
         }
     };
@@ -59,6 +63,9 @@ const ImageUploader: React.FC = () => {
                 onChange={handleImageChange}
             />
             <button onClick={handleSubmit}>Submit</button>
+            <div>
+                {isLoading && <p>Loading...</p>}
+            </div>
         </div>
     );
 };
