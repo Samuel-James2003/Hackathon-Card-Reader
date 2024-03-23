@@ -27,6 +27,20 @@ builder.Services.AddSwaggerGen(c =>
 
     c.IncludeXmlComments($"{AppContext.BaseDirectory}{builder.Environment.ApplicationName}.xml");
 });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Dev", policyBuilder =>
+    {
+        policyBuilder
+            .SetIsOriginAllowedToAllowWildcardSubdomains()
+            .WithOrigins("http://localhost:5235")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials()
+            .SetIsOriginAllowed(origin => true)
+            .Build();
+    });
+});
 
 var app = builder.Build();
 
@@ -39,6 +53,9 @@ if (app.Environment.IsDevelopment())
 }
 
 //app.UseHttpsRedirection();
+
+
+app.UseCors("Dev");
 
 app.UseAuthorization();
 
