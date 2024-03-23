@@ -1,11 +1,11 @@
-import React, { useState,useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import '../index.css';
 import axios from 'axios';
 import { ImageResponseContext } from '../context/ImageResponseContext';
 
-interface chatMessage{
-  role:string;
-  content:string;
+interface chatMessage {
+  role: string;
+  content: string;
 }
 
 const OpenAIRequest = () => {
@@ -13,21 +13,22 @@ const OpenAIRequest = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [inputMessage, setInputMessage] = useState<string>('');
-  const [contextObject, setContextObject] = useState<string>('');
+  const [messageContent, setMessageContent] = useState<string>('');
+  const { responseData } = useContext(ImageResponseContext);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputMessage(event.target.value);
   };
 
-  const handleMessageContext =async ()=>{
+  const handleMessageContext = async () => {
     try {
-      const { responseData } = useContext(ImageResponseContext);
       const params = {
-        pokemonName: responseData?.pokemonName,
-        cardNumber: responseData?.cardNumber
-    };
-      const response = await axios.get('http://localhost:5185/Card',{params})
-
+        name: responseData?.pokemonName,
+        number: responseData?.formatNumber
+      };
+      const response = await axios.get('http://localhost:5185/Card', { params });
+      console.log(response.data.messageContent)
+      return JSON.stringify (response.data) ;
     } catch (error) {
       console.error(error);
     }
@@ -47,40 +48,44 @@ const OpenAIRequest = () => {
 
     try {
       let url = 'http://localhost:5185/Prompt/ConversationAnalysis';
-      
-        messageHistory.push({
-          role:"system",
-          content:"hello you are an AI assistant",
-        });
-     
-      messageHistory.push({
-        role:"user",
-        content:""
-      })
-      const formData = new FormData();
-      let str:string ='';
-      messageHistory.forEach((chatMessage: any)=>{
 
-        str+=chatMessage.role+": "+chatMessage.content+";\n";
-        console.log("str :",str);
+      
+      const message = await handleMessageContext();
+      // console.log(message);
+      // if(message!==undefined)
+      // messageHistory.push({
+      //   role: "system",
+      //   content: message,
+      // })
+      messageHistory.push({
+        role: "system",
+        content: "En te basant sur les données d'une carte pokemon tu es un professionel de carte pokemon et tu dois repondre a des question concernant les informations",
+      });
+      const formData = new FormData();
+      let str: string = '';
+      messageHistory.forEach((chatMessage: any) => {
+
+        str += chatMessage.role + ": " + chatMessage.content + ";\n";
+        console.log("str :", str);
       })
-      console.log("inputMessage :",inputMessage);
-      formData.append('prompt',inputMessage)
-      formData.append('conversationHistory',str);
-      console.log("formData: ",formData.entries());
+      console.log("inputMessage :", inputMessage);
+      messageHistory.push({
+        role: "user",
+        content: inputMessage,
+      });
+      formData.append('prompt',JSON.stringify(message)+" : "+inputMessage);
+
+      formData.append('conversationHistory', str);
+      console.log("formData: ", formData.entries());
       // Using Axios for the POST request
-      const response = await axios.post(url, formData ,{
+      const response = await axios.post(url, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
       console.log(response)
 
-      messageHistory.push({
-        role:"user",
-        
-        content:inputMessage,
-      });
+      
 
       if (response.status !== 200) {
         throw new Error('Failed to fetch response from the server.');
@@ -90,8 +95,9 @@ const OpenAIRequest = () => {
       console.log(responseData)
 
       setMessageHistory([...Messages, {
-        role:"assistant",
-        content:responseData}]);
+        role: "assistant",
+        content: responseData
+      }]);
       setInputMessage('');
     } catch (err: any) {
       setError(err.message);
