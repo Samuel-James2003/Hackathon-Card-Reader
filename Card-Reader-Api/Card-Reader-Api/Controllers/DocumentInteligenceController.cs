@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
-
-using Azure.AI.DocumentIntelligence;
-using Azure;
+using Microsoft.AspNetCore.Http;
 using Azure.AI.FormRecognizer.DocumentAnalysis;
+using Azure;
+using System;
+using System.IO;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Card_Reader_Api.Model;
-using AnalyzeResult = Azure.AI.FormRecognizer.DocumentAnalysis.AnalyzeResult;
 
 namespace Card_Reader_Api.Controllers
 {
@@ -12,32 +14,18 @@ namespace Card_Reader_Api.Controllers
     [Route("[controller]")]
     public class DocumentIntelligenceController : ControllerBase
     {
-        /// <summary>
-        /// Gets the details from the card sent
-        /// </summary>
-        /// <param name="file">Image of the card</param>
-        /// <param name="url">Url to the image to be treated</param>
-        /// <returns>A <see cref="string"/> containing the pokemon name and a <seealso cref="string"/> containg the Pokemon ID </returns>
-        /// <exception cref="ArgumentNullException">both file and url are null</exception>
-        /// <exception cref="NotImplementedException">Not ready for HEIF</exception>
-     
         [HttpGet(Name = "GetCardDetailsPost")]
         public async Task<IActionResult> GetCardDetailsPost([FromQuery] string imageUrl)
         {
-            var credential = new AzureKeyCredential(Env.KEY_DOC_INTEL);
-            var client = new DocumentAnalysisClient(new Uri(Env.URL_DOC_INTEL), credential);
-
-            if (string.IsNullOrEmpty(imageUrl))
-            {
-                return BadRequest("Image URL cannot be null or empty.");
-            }
-
             try
             {
-                string PokemonName = "";
-                string CardCode = "";
-                string CardNumber = "";
-                string FormattedCardNumber = "";
+                if (string.IsNullOrEmpty(imageUrl))
+                {
+                    return BadRequest("Image URL cannot be null or empty.");
+                }
+
+                var credential = new AzureKeyCredential(Env.KEY_DOC_INTEL);
+                var client = new DocumentAnalysisClient(new Uri(Env.URL_DOC_INTEL), credential);
 
                 using (HttpClient httpClient = new HttpClient())
                 {
@@ -46,45 +34,115 @@ namespace Card_Reader_Api.Controllers
                         using (Stream stream = await response.Content.ReadAsStreamAsync())
                         {
                             string modelId = "card-reader-model";
-
-                            // Analyse du document
-                            Console.WriteLine("Analyzing document...");
                             AnalyzeDocumentOperation operation = await client.AnalyzeDocumentAsync(WaitUntil.Completed, modelId, stream);
-                            // Attente de la complétion de l'opération
                             await operation.WaitForCompletionAsync();
 
-                            // Récupération des résultats
                             AnalyzeResult result = operation.Value;
 
-                            // Afficher les données extraites
-                            Console.WriteLine("Document analysis completed.");
+                            string PokemonName = "";
+                            string CardCode = "";
+                            string CardNumber = "";
+                            string FormattedCardNumber = "";
 
-                            // Parcourir les documents analysés
                             foreach (var document in result.Documents)
                             {
-                                // Parcourir les champs du document
                                 foreach (var fieldKvp in document.Fields)
                                 {
                                     var fieldName = fieldKvp.Key;
                                     var fieldValue = fieldKvp.Value;
 
-                                    if (fieldName == "Pokemon name" || fieldName == "Card code" || fieldName == "Card Number")
-                                    {
-                                        Console.WriteLine($"{fieldName}: {fieldValue.Content}");
-                                    }
                                     if (fieldName == "Pokemon name")
                                     {
                                         PokemonName = fieldValue.Content;
                                     }
-                                    if (fieldName == "Card code")
+                                    else if (fieldName == "Card code")
                                     {
                                         CardCode = fieldValue.Content;
                                     }
-                                    if (fieldName == "Card Number")
+                                    else if (fieldName == "Card Number")
                                     {
                                         CardNumber = fieldValue.Content;
                                     }
                                 }
+                            }
+
+                            FormattedCardNumber = CardNumber.TrimStart('0').Split('/')[0];
+                            string pokemonApiUrl = $"https://api.pokemontcg.io/v2/cards?q=name:{PokemonName}+number:{FormattedCardNumber}";
+
+                            using (HttpResponseMessage apiResponse = await httpClient.GetAsync(pokemonApiUrl))
+                            {
+                                if (apiResponse.IsSuccessStatusCode)
+                                {
+                                    string resultContent = await apiResponse.Content.ReadAsStringAsync();
+                                    return Ok(resultContent);
+                                }
+                                else
+                                {
+                                    return StatusCode((int)apiResponse.StatusCode);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+        [HttpPost("GetCardDetailsLocal")]
+        public async Task<IActionResult> GetCardDetailsLocal(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("Please select a file.");
+            }
+
+            var credential = new AzureKeyCredential(Env.KEY_DOC_INTEL);
+            var client = new DocumentAnalysisClient(new Uri(Env.URL_DOC_INTEL), credential);
+
+            try
+            {
+                string PokemonName = "";
+                string CardCode = "";
+                string CardNumber = "";
+                string FormattedCardNumber = "";
+
+                using (var stream = file.OpenReadStream())
+                {
+                    string modelId = "card-reader-model";
+
+                    AnalyzeDocumentOperation operation = await client.AnalyzeDocumentAsync(WaitUntil.Completed, modelId, stream);
+                    // Attente de la complétion de l'opération
+                    await operation.WaitForCompletionAsync();
+
+                    // Récupération des résultats
+                    AnalyzeResult result = operation.Value;
+
+                    // Parcourir les documents analysés
+                    foreach (var document in result.Documents)
+                    {
+                        // Parcourir les champs du document
+                        foreach (var fieldKvp in document.Fields)
+                        {
+                            var fieldName = fieldKvp.Key;
+                            var fieldValue = fieldKvp.Value;
+
+                            if (fieldName == "Pokemon name" || fieldName == "Card code" || fieldName == "Card Number")
+                            {
+                                Console.WriteLine($"{fieldName}: {fieldValue.Content}");
+                            }
+                            if (fieldName == "Pokemon name")
+                            {
+                                PokemonName = fieldValue.Content;
+                            }
+                            if (fieldName == "Card code")
+                            {
+                                CardCode = fieldValue.Content;
+                            }
+                            if (fieldName == "Card Number")
+                            {
+                                CardNumber = fieldValue.Content;
                             }
                         }
                     }
