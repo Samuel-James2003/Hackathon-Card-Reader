@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState,useContext } from 'react';
 import '../index.css';
 import axios from 'axios';
+import { ImageResponseContext } from '../context/ImageResponseContext';
 
 interface chatMessage{
   role:string;
@@ -17,6 +18,20 @@ const OpenAIRequest = () => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputMessage(event.target.value);
   };
+
+  const handleMessageContext =async ()=>{
+    try {
+      const { responseData } = useContext(ImageResponseContext);
+      const params = {
+        pokemonName: responseData?.pokemonName,
+        cardNumber: responseData?.cardNumber
+    };
+      const response = await axios.get('http://localhost:5185/Card',{params})
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -38,7 +53,10 @@ const OpenAIRequest = () => {
           content:"hello you are an AI assistant",
         });
      
-      
+      messageHistory.push({
+        role:"user",
+        content:""
+      })
       const formData = new FormData();
       let str:string ='';
       messageHistory.forEach((chatMessage: any)=>{
@@ -112,3 +130,5 @@ const OpenAIRequest = () => {
 };
 
 export default OpenAIRequest;
+
+

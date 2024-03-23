@@ -15,7 +15,7 @@ namespace Card_Reader_Api.Controllers
     [Route("[controller]")]
     public class DocumentIntelligenceController : ControllerBase
     {
-        [HttpGet(Name = "GetCardDetailsPost")]
+        /*[HttpGet(Name = "GetCardDetailsPost")]
         public async Task<IActionResult> GetCardDetailsPost([FromQuery] string imageUrl)
         {
             try
@@ -96,7 +96,7 @@ namespace Card_Reader_Api.Controllers
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
-        }
+        }*/
 
         [HttpPost("GetCardDetailsLocal")]
         public async Task<DtoAnalysePokemon> GetCardDetailsLocal(IFormFile file)
