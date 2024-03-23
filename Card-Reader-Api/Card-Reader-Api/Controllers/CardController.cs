@@ -5,12 +5,22 @@ using PokemonTcgSdk.Standard.Infrastructure.HttpClients;
 
 namespace Card_Reader_Api.Controllers
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class CardController : ControllerBase
     {
-        [HttpGet(Name = "pokemoncard")]
-        public async Task<ApiResourceList<Card>> Get([FromQuery] string name, [FromQuery] string number)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name">Pokemon name</param>
+        /// <param name="number"> Pokemon Identification Number</param>
+        /// <returns> <see cref="Card"/> that matches the Name and ID  </returns>
+        [HttpGet(Name = "GetPokemonCard")]
+        public async Task<Card> GetPokemonCard([FromQuery] string name, [FromQuery] string number)
         {
             PokemonApiClient pokeClient = new PokemonApiClient(Env.KEY_POKEMON);
 
@@ -20,7 +30,9 @@ namespace Card_Reader_Api.Controllers
                 { "number", number }
             };
             var cards = await pokeClient.GetApiResourceAsync<Card>(filter);
-            return cards;
+
+            return cards.Results.First();
         }
     }
 }
+
