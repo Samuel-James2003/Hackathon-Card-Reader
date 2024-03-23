@@ -7,21 +7,24 @@ using System.Text;
 
 namespace Card_Reader_Api.Controllers
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class PromptController : ControllerBase
     {
 
         /// <summary>
-        /// 
+        /// Sends a message to chatgpt
         /// </summary>
+        /// <remarks>If the conversationHistory is null a system prompt is required </remarks>
         /// <param name="conversationHistory"> Assuming the format of each message is "sender: content" </param>
-        /// <param name="prompt">Stri</param>
-        /// <param name="system"></param>
-        /// <returns></returns>
+        /// <param name="prompt"> The user's question </param>
+        /// <param name="system"> The system prompt </param>
+        /// <returns> Returns chatgpt's response  </returns>
         [HttpGet(Name = "ConversationAnalysis")]
         public async Task<string> ConversationAnalysis(string? conversationHistory, string prompt, string? system)
-
         {
             try
             {
@@ -35,7 +38,7 @@ namespace Card_Reader_Api.Controllers
                     ChatRequestUserMessage promptMessage = new(prompt);
                     requestOptions = new ChatCompletionsOptions
                     {
-                        DeploymentName = "gpt4-003",
+                        DeploymentName = Env.MODEL_OPEN_AI,
                         Messages = { systemMessage, promptMessage }
                     };
                 }
@@ -44,7 +47,6 @@ namespace Card_Reader_Api.Controllers
                    
                     if (!string.IsNullOrEmpty(conversationHistory))
                     {
-
                         string[] messages = conversationHistory.Split(';');
                         foreach (string message in messages)
                         {
@@ -70,7 +72,7 @@ namespace Card_Reader_Api.Controllers
                                 }
                             }
                         }
-
+                        Messages.Add(new ChatRequestUserMessage(prompt));
                         // Construct requestOptions with the parsed messages
                         requestOptions = new ChatCompletionsOptions(Env.MODEL_OPEN_AI, Messages);
                     }

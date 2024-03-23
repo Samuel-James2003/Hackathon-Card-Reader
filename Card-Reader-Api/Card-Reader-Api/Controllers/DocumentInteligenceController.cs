@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Card_Reader_Api.Controllers
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class DocumentInteligenceController : ControllerBase
