@@ -1,4 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using PokemonTcgSdk.Standard.Features.FilterBuilder.Pokemon;
+using PokemonTcgSdk.Standard.Infrastructure.HttpClients;
+using PokemonTcgSdk.Standard.Infrastructure.HttpClients.Base;
+using PokemonTcgSdk.Standard.Infrastructure.HttpClients.Cards;
 
 namespace Card_Reader_Api.Controllers
 {
@@ -6,28 +10,19 @@ namespace Card_Reader_Api.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
 
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        [HttpGet(Name = "pokemoncard")]
+        public async Task<ApiResourceList<Card>> Get()
         {
-            _logger = logger;
-        }
-
-        [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
-        {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            PokemonApiClient pokeClient = new PokemonApiClient("1c32b871-0b3c-4c43-97c3-fcf646079c38");
+            
+            var filter =new Dictionary<string, string>
             {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+                {"name","Venusaur"},
+                {"number","1"}
+            };
+            var cards = await pokeClient.GetApiResourceAsync<Card>(filter);
+            return cards;
         }
     }
 }
