@@ -10,7 +10,7 @@ namespace Card_Reader_Api.Controllers
     public class CardController : ControllerBase
         {
           [HttpGet(Name = "pokemoncard")]
-            public async Task<ApiResourceList<Card>> Get(string name,string number)
+            public async Task<ApiResourceList<Card>> Get([FromQuery] string name, [FromQuery] string number)
             {
                 PokemonApiClient pokeClient = new PokemonApiClient(Env.KEY_POKEMON);
 

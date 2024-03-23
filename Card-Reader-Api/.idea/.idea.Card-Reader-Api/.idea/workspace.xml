@@ -10,9 +10,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ac180d6e-58d3-4d9e-809e-f820022ec06d" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Card-Reader-Api/Controllers/DocumentInteligenceController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Card-Reader-Api/Controllers/DocumentInteligenceController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Card-Reader-Api/Controllers/WeatherForecastController.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Card-Reader-Api/WeatherForecast.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Card-Reader-Api/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Card-Reader-Api/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Card-Reader-Api/Controllers/CardController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Card-Reader-Api/Controllers/CardController.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,7 +34,7 @@
     ".NET Launch Settings Profile.Card-Reader-Api: http.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "Merging main",
+    "git-widget-placeholder": "main",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -106,7 +105,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1711180981370</updated>
-      <workItem from="1711180984072" duration="3880000" />
+      <workItem from="1711180984072" duration="4928000" />
     </task>
     <servers />
   </component>
