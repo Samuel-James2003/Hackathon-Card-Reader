@@ -23,8 +23,8 @@ namespace Card_Reader_Api.Controllers
         /// <param name="prompt"> The user's question </param>
         /// <param name="system"> The system prompt </param>
         /// <returns> Returns chatgpt's response  </returns>
-        [HttpGet(Name = "ConversationAnalysis")]
-        public async Task<string> ConversationAnalysis(string? conversationHistory, string prompt, string? system)
+        [HttpPost(Name = "ConversationAnalysis")]
+        public async Task<string> ConversationAnalysis([FromBody]string? conversationHistory,[FromQuery] string prompt, [FromQuery] string? system)
         {
             try
             {
