@@ -18,7 +18,7 @@ namespace Card_Reader_Api.Controllers
         /// <param name="prompt">Stri</param>
         /// <param name="system"></param>
         /// <returns></returns>
-        [HttpGet(Name = "test")]
+        [HttpGet(Name = "ConversationAnalysis")]
         public async Task<string> ConversationAnalysis(string? conversationHistory, string prompt, string? system)
         {
             try
@@ -72,7 +72,7 @@ namespace Card_Reader_Api.Controllers
                         requestOptions = new ChatCompletionsOptions(Env.MODEL_OPEN_AI, Messages);
                     }
                 }
-
+                requestOptions.MaxTokens = 2000;
                 var response = await openai.GetChatCompletionsAsync(requestOptions);
                 // Extraire la réponse
                 var analysisResult = response.Value.Choices.FirstOrDefault()?.Message?.Content;
