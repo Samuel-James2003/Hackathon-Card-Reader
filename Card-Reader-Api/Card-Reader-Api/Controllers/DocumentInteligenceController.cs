@@ -19,8 +19,7 @@ namespace Card_Reader_Api.Controllers
         /// <param name="url">Url to the image to be treated</param>
         /// <returns>A <see cref="string"/> containing the pokemon name and a <seealso cref="string"/> containg the Pokemon ID </returns>
         /// <exception cref="ArgumentNullException">both file and url are null</exception>
-        /// <exception cref="NotImplementedException">Not ready for HEIF</exception>
-     
+        /// <exception cref="NotImplementedException">Not ready for HEIF</exception
         [HttpGet(Name = "GetCardDetailsPost")]
         public async Task<IActionResult> GetCardDetailsPost([FromQuery] string imageUrl)
         {
@@ -50,16 +49,16 @@ namespace Card_Reader_Api.Controllers
                             // Analyse du document
                             Console.WriteLine("Analyzing document...");
                             AnalyzeDocumentOperation operation = await client.AnalyzeDocumentAsync(WaitUntil.Completed, modelId, stream);
-                            // Attente de la complétion de l'opération
+                            // Attente de la complï¿½tion de l'opï¿½ration
                             await operation.WaitForCompletionAsync();
 
-                            // Récupération des résultats
+                            // Rï¿½cupï¿½ration des rï¿½sultats
                             AnalyzeResult result = operation.Value;
 
-                            // Afficher les données extraites
+                            // Afficher les donnï¿½es extraites
                             Console.WriteLine("Document analysis completed.");
 
-                            // Parcourir les documents analysés
+                            // Parcourir les documents analysï¿½s
                             foreach (var document in result.Documents)
                             {
                                 // Parcourir les champs du document
