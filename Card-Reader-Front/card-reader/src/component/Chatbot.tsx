@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
 import '../index.css';
+import axios from 'axios';
+
+interface chatMessage{
+  role:string;
+  content:string;
+}
 
 const OpenAIRequest = () => {
-  const [messageHistory, setMessageHistory] = useState<string[]>([]);
+  const [messageHistory, setMessageHistory] = useState<chatMessage[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [inputMessage, setInputMessage] = useState<string>('');
@@ -22,44 +28,66 @@ const OpenAIRequest = () => {
 
     setLoading(true);
     setError(null);
-    let Messages : string[] = messageHistory;
-    
-    try {
-      let url = 'https://localhost:7183/Prompt/ConversationAnalysis?prompt='+{inputMessage}
-      if(messageHistory === null)
-      {
-        url+= "&system=" + "Tu es une ia assistante"
-        Messages.push("system: Tu es une ia assistante;")
-      }
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ conversationHistory: messageHistory }),
-      });
-      Messages.push("user: "+ {inputMessage})
+    let Messages: chatMessage[] = messageHistory;
 
-      if (!response.ok) {
+    try {
+      let url = 'http://localhost:5185/Prompt/ConversationAnalysis';
+      
+        messageHistory.push({
+          role:"system",
+          content:"hello you are an AI assistant",
+        });
+     
+      
+      const formData = new FormData();
+      let str:string ='';
+      messageHistory.forEach((chatMessage: any)=>{
+
+        str+=chatMessage.role+": "+chatMessage.content+";\n";
+        console.log("str :",str);
+      })
+      console.log("inputMessage :",inputMessage);
+      formData.append('prompt',inputMessage)
+      formData.append('conversationHistory',str);
+      console.log("formData: ",formData.entries());
+      // Using Axios for the POST request
+      const response = await axios.post(url, formData ,{
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      console.log(response)
+
+      messageHistory.push({
+        role:"user",
+        
+        content:inputMessage,
+      });
+
+      if (response.status !== 200) {
         throw new Error('Failed to fetch response from the server.');
       }
 
-      const responseData = await response.json();
-      setMessageHistory([...Messages, responseData.message]);
+      const responseData = response.data;
+      console.log(responseData)
+
+      setMessageHistory([...Messages, {
+        role:"assistant",
+        content:responseData}]);
       setInputMessage('');
-    } catch (err : any) {
+    } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  return (  
+  return (
     <div className="openai-container">
       <div className="centered-content">
         <div className="message-history">
           {messageHistory.map((message, index) => (
-            <p key={index}>{message}</p>
+            <p key={index}>{message.content}</p>
           ))}
         </div>
         <form onSubmit={handleSubmit}>
