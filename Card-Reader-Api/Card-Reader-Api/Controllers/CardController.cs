@@ -12,6 +12,7 @@ namespace Card_Reader_Api.Controllers
     [Route("[controller]")]
     public class CardController : ControllerBase
     {
+
         /// <summary>
         /// Gets the pokemon card based on the name and ID 
         /// </summary>
@@ -25,11 +26,13 @@ namespace Card_Reader_Api.Controllers
 
             var filter = new Dictionary<string, string>
             {
-                {"name",name},
-                {"number",number}
+                { "name", name },
+                { "number", number }
             };
             var cards = await pokeClient.GetApiResourceAsync<Card>(filter);
+
             return cards.Results.First();
         }
     }
 }
+
