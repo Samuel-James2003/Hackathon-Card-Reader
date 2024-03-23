@@ -1,0 +1,22 @@
+/* styles.css */
+
+.chatBubble {
+    border-radius: 8px;
+    padding: 10px;
+    margin: 5px;
+    width: fit-content;
+    max-width: 70%;
+    clear: both; /* Clear floats to ensure proper alignment */
+  }
+  
+  .assistant {
+    background-color: #e0e0e0; /* Lighter color for assistant */
+    float: left; /* Align assistant messages to the left */
+  }
+  
+  .user {
+    background-color: #4b4b4b; /* Darker color for user */
+    color: white; /* Text color for user messages */
+    float: right; /* Align user messages to the right */
+  }
+  
