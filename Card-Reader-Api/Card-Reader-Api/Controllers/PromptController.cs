@@ -11,6 +11,7 @@ namespace Card_Reader_Api.Controllers
     [Route("[controller]")]
     public class PromptController : ControllerBase
     {
+
         /// <summary>
         /// 
         /// </summary>
@@ -20,10 +21,12 @@ namespace Card_Reader_Api.Controllers
         /// <returns></returns>
         [HttpGet(Name = "ConversationAnalysis")]
         public async Task<string> ConversationAnalysis(string? conversationHistory, string prompt, string? system)
+
         {
             try
             {
                 var openai = new OpenAIClient(new Uri(Env.URL_OPEN_AI), new Azure.AzureKeyCredential(Env.KEY_OPEN_AI));
+
                 IList<ChatRequestMessage> Messages = [];
                 ChatCompletionsOptions requestOptions = new();
                 if (string.IsNullOrEmpty(conversationHistory))
