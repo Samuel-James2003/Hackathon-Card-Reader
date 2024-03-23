@@ -15,7 +15,7 @@ namespace Card_Reader_Api.Controllers
         [HttpGet(Name = "pokemoncard")]
         public async Task<ApiResourceList<Card>> Get()
         {
-            PokemonApiClient pokeClient = new PokemonApiClient("1c32b871-0b3c-4c43-97c3-fcf646079c38");
+            PokemonApiClient pokeClient = new PokemonApiClient(Env.KEY_POKEMON);
             
             var filter =new Dictionary<string, string>
             {
