@@ -11,14 +11,10 @@ using Newtonsoft.Json;
 
 namespace Card_Reader_Api.Controllers
 {
-    /// <summary>
-    /// 
-    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class DocumentIntelligenceController : ControllerBase
     {
-
         public async Task<IActionResult> GetCardDetailsPost([FromQuery] string imageUrl)
         {
             try
@@ -40,11 +36,8 @@ namespace Card_Reader_Api.Controllers
                         {
                             Console.Write(imageUrl);
                             string modelId = "card-reader-model";
-                            AnalyzeDocumentOperation operation =
-                                await client.AnalyzeDocumentAsync(WaitUntil.Completed, modelId, stream);
-
+                            AnalyzeDocumentOperation operation = await client.AnalyzeDocumentAsync(WaitUntil.Completed, modelId, stream);
                             await operation.WaitForCompletionAsync();
-
                             AnalyzeResult result = operation.Value;
 
                             string PokemonName = "";
@@ -74,10 +67,8 @@ namespace Card_Reader_Api.Controllers
                                 }
                             }
 
-
                             FormattedCardNumber = CardNumber.TrimStart('0').Split('/')[0];
-                            string pokemonApiUrl =
-                                $"https://api.pokemontcg.io/v2/cards?q=name:{PokemonName}+number:{FormattedCardNumber}";
+                            string pokemonApiUrl = $"https://api.pokemontcg.io/v2/cards?q=name:{PokemonName}+number:{FormattedCardNumber}";
 
                             using (HttpResponseMessage apiResponse = await httpClient.GetAsync(pokemonApiUrl))
                             {
@@ -99,16 +90,7 @@ namespace Card_Reader_Api.Controllers
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
-
-        }*/
-
-
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="file"></param>
-        /// <returns></returns>
 
         [HttpPost("GetCardDetailsLocal")]
         public async Task<DtoAnalysePokemon> GetCardDetailsLocal(IFormFile file)
@@ -128,11 +110,8 @@ namespace Card_Reader_Api.Controllers
                     using (Stream stream = file.OpenReadStream())
                     {
                         string modelId = "card-reader-model";
-                        AnalyzeDocumentOperation operation =
-                            await client.AnalyzeDocumentAsync(WaitUntil.Completed, modelId, stream);
-
+                        AnalyzeDocumentOperation operation = await client.AnalyzeDocumentAsync(WaitUntil.Completed, modelId, stream);
                         await operation.WaitForCompletionAsync();
-
                         AnalyzeResult result = operation.Value;
 
                         string PokemonName = "";
@@ -184,23 +163,20 @@ namespace Card_Reader_Api.Controllers
                                 return null;
                             }
                         }
-
-
                     }
-
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return null;
             }
         }
+    }
 
-        public class DtoAnalysePokemon
-        {
-            public string PokemonName { get; set; }
-            public string CardNumber { get; set; }
-            public string FormatNumber { get; set; }
-        }
+    public class DtoAnalysePokemon
+    {
+        public string PokemonName { get; set; }
+        public string CardNumber { get; set; }
+        public string FormatNumber { get; set; }
     }
 }
