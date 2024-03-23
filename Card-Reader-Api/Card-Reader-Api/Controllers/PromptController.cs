@@ -1,4 +1,5 @@
-﻿using Azure.AI.OpenAI;
+﻿using System.Diagnostics;
+using Azure.AI.OpenAI;
 using Card_Reader_Api.Model;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -29,9 +30,11 @@ namespace Card_Reader_Api.Controllers
             try
             {
                 var openai = new OpenAIClient(new Uri(Env.URL_OPEN_AI), new Azure.AzureKeyCredential(Env.KEY_OPEN_AI));
-
+                Console.WriteLine(conversationHistory);
                 IList<ChatRequestMessage> Messages = [];
                 ChatCompletionsOptions requestOptions = new();
+                
+                
                 if (string.IsNullOrEmpty(conversationHistory))
                 {
                     ChatRequestSystemMessage systemMessage = new(system);
