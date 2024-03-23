@@ -1,3 +1,5 @@
+using Microsoft.OpenApi.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -5,7 +7,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("1.0.5", new OpenApiInfo
+    {
+        Version = "1.0.5",
+        Title = "Trading card recognizer",
+        Description = "Trading card recognizer for Hackathon 2024"
+    });
+
+    c.IncludeXmlComments($"{AppContext.BaseDirectory}{builder.Environment.ApplicationName}.xml");
+});
 
 var app = builder.Build();
 
@@ -13,7 +25,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/1.0.5/swagger.json", "Trading card recognizer Documentation"));
 }
 
 app.UseHttpsRedirection();
