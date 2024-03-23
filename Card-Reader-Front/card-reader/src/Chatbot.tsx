@@ -1,63 +1,44 @@
 import React, { useState } from 'react';
 import './index.css';
-import OpenAI, { Completion } from 'openai';
 
-interface Message {
-  role: string;
-  content: string;
-}
-
-const Chatbot = () => {
-  const [messageHistory, setMessageHistory] = useState<Message[]>([]);
+const OpenAIRequest = () => {
+  const [messageHistory, setMessageHistory] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [inputMessage, setInputMessage] = useState<string>('');
 
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length > 0) {
-      setSelectedFile(event.target.files[0]);
-    }
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setInputMessage(event.target.value);
   };
 
-  const openaiClient = new OpenAI({
-    apiKey: process.env.REACT_APP_OPENAI_API_KEY || '',
-    dangerouslyAllowBrowser: true
-  });
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-  const generateResponse = async () => {
-    if (!selectedFile) {
-      alert('Please select a file.');
+    if (!inputMessage) {
+      alert('Please enter a message.');
       return;
     }
 
     setLoading(true);
     setError(null);
+
     try {
-      const reader = new FileReader();
-      reader.readAsText(selectedFile);
-      reader.onload = async () => {
-        if (reader.result) {
-          let userInputFromFile: string = reader.result.toString();
-          const question = " donne moi les noms de toute les personnes que tu vois ";
-          userInputFromFile += question;
+      const response = await fetch('/prompt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: inputMessage }),
+      });
 
-          const newMessageHistory: Message[] = [...messageHistory, { role: 'user', content: userInputFromFile }];
+      if (!response.ok) {
+        throw new Error('Failed to fetch response from the server.');
+      }
 
-          const response: Completion | null = await openaiClient.chat.completions.create({
-            model: 'gpt-3.5-turbo',
-            messages: newMessageHistory,
-            max_tokens:  500,
-          });
-
-          if (response && response.choices && response.choices.length > 0) {
-            setMessageHistory([...newMessageHistory, response.choices[0].message]);
-          } else {
-            throw new Error('Unexpected response structure');
-          }
-        }
-      };
-    } catch (err) {
+      const responseData = await response.json();
+      setMessageHistory([...messageHistory, responseData.message]);
+      setInputMessage('');
+    } catch (err : any) {
       setError(err.message);
     } finally {
       setLoading(false);
@@ -69,27 +50,28 @@ const Chatbot = () => {
       <div className="centered-content">
         <div className="message-history">
           {messageHistory.map((message, index) => (
-            <p key={index} className={message.role === 'user' ? 'user_msg' : ''}>
-              <span>{message.content}</span>
-            </p>
+            <p key={index}>{message}</p>
           ))}
         </div>
-        <input
-          type="file"
-          onChange={handleFileChange}
-        />
-        <button
-          type="submit"
-          aria-label="Send Message"
-          onClick={generateResponse}
-          disabled={loading || !selectedFile}
-        >
-          {loading ? 'Loading...' : 'Send'}
-        </button>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            value={inputMessage}
+            onChange={handleChange}
+            placeholder="Type your message..."
+          />
+          <button
+            type="submit"
+            aria-label="Send Message"
+            disabled={loading || !inputMessage}
+          >
+            {loading ? 'Loading...' : 'Send'}
+          </button>
+        </form>
         {error && <p className="error-message">{error}</p>}
       </div>
     </div>
   );
 };
 
-export default Chatbot;
+export default OpenAIRequest;

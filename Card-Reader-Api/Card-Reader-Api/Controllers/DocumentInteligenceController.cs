@@ -8,6 +8,9 @@ using AnalyzeResult = Azure.AI.FormRecognizer.DocumentAnalysis.AnalyzeResult;
 
 namespace Card_Reader_Api.Controllers
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class DocumentIntelligenceController : ControllerBase
