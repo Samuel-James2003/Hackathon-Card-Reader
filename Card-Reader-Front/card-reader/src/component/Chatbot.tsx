@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import './index.css';
+import '../index.css';
 
 const OpenAIRequest = () => {
   const [messageHistory, setMessageHistory] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [inputMessage, setInputMessage] = useState<string>('');
+  const [contextObject, setContextObject] = useState<string>('');
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputMessage(event.target.value);
@@ -21,22 +22,30 @@ const OpenAIRequest = () => {
 
     setLoading(true);
     setError(null);
-
+    let Messages : string[] = messageHistory;
+    
     try {
-      const response = await fetch('/prompt', {
+      let url = 'https://localhost:7183/Prompt/ConversationAnalysis?prompt='+{inputMessage}
+      if(messageHistory === null)
+      {
+        url+= "&system=" + "Tu es une ia assistante"
+        Messages.push("system: Tu es une ia assistante;")
+      }
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: inputMessage }),
+        body: JSON.stringify({ conversationHistory: messageHistory }),
       });
+      Messages.push("user: "+ {inputMessage})
 
       if (!response.ok) {
         throw new Error('Failed to fetch response from the server.');
       }
 
       const responseData = await response.json();
-      setMessageHistory([...messageHistory, responseData.message]);
+      setMessageHistory([...Messages, responseData.message]);
       setInputMessage('');
     } catch (err : any) {
       setError(err.message);
