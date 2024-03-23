@@ -8,8 +8,9 @@ namespace Card_Reader_Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    public class DocumentInteligenceController : ControllerBase
     {
+
 
         [HttpGet(Name = "pokemoncard")]
         public async Task<ApiResourceList<Card>> Get()
