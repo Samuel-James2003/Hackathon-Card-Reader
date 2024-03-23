@@ -1,7 +1,9 @@
+
 import React, { useState, useContext } from 'react';
 import '../index.css';
 import axios from 'axios';
 import { ImageResponseContext } from '../context/ImageResponseContext';
+
 
 interface chatMessage {
   role: string;
@@ -13,8 +15,10 @@ const OpenAIRequest = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [inputMessage, setInputMessage] = useState<string>('');
+
   const [messageContent, setMessageContent] = useState<string>('');
   const { responseData } = useContext(ImageResponseContext);
+
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputMessage(event.target.value);
@@ -50,6 +54,7 @@ const OpenAIRequest = () => {
       let url = 'http://localhost:5185/Prompt/ConversationAnalysis';
 
       
+
       const message = await handleMessageContext();
       // console.log(message);
       // if(message!==undefined)
@@ -61,6 +66,7 @@ const OpenAIRequest = () => {
         role: "system",
         content: "En te basant sur les données d'une carte pokemon tu es un professionel de carte pokemon et tu dois repondre a des question concernant les informations",
       });
+
       const formData = new FormData();
       let str: string = '';
       messageHistory.forEach((chatMessage: any) => {
@@ -105,13 +111,39 @@ const OpenAIRequest = () => {
       setLoading(false);
     }
   };
+  useEffect(() => {
+    scrollToBottom();
+  }, [messageHistory]);
+
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  };
+
+  const showChat = (message:chatMessage) => {
+    if (message.role === "assistant") {
+      return (
+        <>
+          <div className="chatBubble assistant">{message.content}</div>
+        </>
+      );
+    }
+    if (message.role === "user") {
+      return (
+        <>
+          <div className="chatBubble user">{message.content}</div>
+        </>
+      );
+    }
+  };
 
   return (
     <div className="openai-container">
       <div className="centered-content">
         <div className="message-history">
-          {messageHistory.map((message, index) => (
-            <p key={index}>{message.content}</p>
+          {messageHistory.map((message:chatMessage, index: any) => (
+            <p key={index}>{showChat(message)}</p>
           ))}
         </div>
         <form onSubmit={handleSubmit}>
