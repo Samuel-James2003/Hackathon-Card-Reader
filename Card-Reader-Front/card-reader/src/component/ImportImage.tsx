@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import axios from 'axios';
+import { ImageResponseContext } from '../context/ImageResponseContext';
 
 const ImageUploader: React.FC = () => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const { setResponseData } = useContext(ImageResponseContext);
 
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files[0]) {
@@ -22,6 +24,11 @@ const ImageUploader: React.FC = () => {
                     }
                 });
                 console.log(response.data);
+                setResponseData({
+                    pokemonName:response.data.pokemonName,
+                    cardNumber:response.data.cardNumber,
+                    formatNumber:response.data.formatNumber,
+                });
             } catch (error) {
                 console.error(error);
             }
