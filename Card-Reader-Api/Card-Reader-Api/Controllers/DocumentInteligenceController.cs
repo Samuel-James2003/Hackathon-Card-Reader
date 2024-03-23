@@ -11,19 +11,5 @@ namespace Card_Reader_Api.Controllers
     public class DocumentInteligenceController : ControllerBase
     {
 
-
-        [HttpGet(Name = "pokemoncard")]
-        public async Task<ApiResourceList<Card>> Get()
-        {
-            PokemonApiClient pokeClient = new PokemonApiClient(Env.KEY_POKEMON);
-            
-            var filter =new Dictionary<string, string>
-            {
-                {"name","Venusaur"},
-                {"number","1"}
-            };
-            var cards = await pokeClient.GetApiResourceAsync<Card>(filter);
-            return cards;
-        }
     }
 }
