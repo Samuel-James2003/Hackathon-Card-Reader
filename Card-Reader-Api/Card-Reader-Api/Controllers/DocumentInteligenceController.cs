@@ -15,7 +15,7 @@ namespace Card_Reader_Api.Controllers
         /// <exception cref="ArgumentNullException"> both file and url are null</exception>
         /// <exception cref="NotImplementedException">Not ready for HEIF</exception>
         [HttpPost(Name = "GetCardDetailsPost")]
-        public async Task<(string, string)> GetCardDetails([FromBody] IFormFile? file, [FromQuery] string? url)
+        public async Task<(string, string)> GetCardDetails([FromBody] IFormFile? file, [FromQuery( Name = "Url")] string? url)
         {
             string PokeName = "", PokeID = "";
             if (string.IsNullOrEmpty(url) && file is null)

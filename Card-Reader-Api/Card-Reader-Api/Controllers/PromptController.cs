@@ -11,30 +11,72 @@ namespace Card_Reader_Api.Controllers
     [Route("[controller]")]
     public class PromptController : ControllerBase
     {
-  
-        [HttpGet(Name = "chatbot")]
-        public async Task<string> ConversationAnalysis(string prompt, string system)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="conversationHistory"> Assuming the format of each message is "sender: content" </param>
+        /// <param name="prompt">Stri</param>
+        /// <param name="system"></param>
+        /// <returns></returns>
+        [HttpGet(Name = "test")]
+        public async Task<string> ConversationAnalysis(string? conversationHistory, string prompt, string? system)
+
         {
             try
             {
                 var openai = new OpenAIClient(new Uri(Env.URL_OPEN_AI), new Azure.AzureKeyCredential(Env.KEY_OPEN_AI));
 
-                string conversationHistory = ""; // Initialize a new string to hold the conversation history
-
-                // Append the conversation history to the prompt
-                prompt = $"{prompt}\n {conversationHistory}";
-                ChatRequestSystemMessage systemMessage = new(system);
-                ChatRequestUserMessage message = new ChatRequestUserMessage(prompt);
-
-                // Paramètres de la requête
-                var requestOptions = new ChatCompletionsOptions
+                IList<ChatRequestMessage> Messages = [];
+                ChatCompletionsOptions requestOptions = new();
+                if (string.IsNullOrEmpty(conversationHistory))
                 {
-                    DeploymentName = "gpt4-003",
-                    Messages = { message, systemMessage },
-                    MaxTokens = 2000
-                };
+                    ChatRequestSystemMessage systemMessage = new(system);
+                    ChatRequestUserMessage promptMessage = new(prompt);
+                    requestOptions = new ChatCompletionsOptions
+                    {
+                        DeploymentName = "gpt4-003",
+                        Messages = { systemMessage, promptMessage }
+                    };
+                }
+                else if (string.IsNullOrEmpty(system))
+                {
+                   
+                    if (!string.IsNullOrEmpty(conversationHistory))
+                    {
 
-                // Envoyer la requête à Azure OpenAI et attendre la réponse
+                        string[] messages = conversationHistory.Split(';');
+                        foreach (string message in messages)
+                        {
+                           
+                            string[] parts = message.Split(':');
+                            if (parts.Length == 2)
+                            {
+                                string sender = parts[0].Trim();
+                                string content = parts[1].Trim();
+                                switch (sender.ToLower())
+                                {
+                                    case "system":
+                                        Messages.Add(new ChatRequestSystemMessage(content));
+                                        break;
+                                    case "user":
+                                        Messages.Add(new ChatRequestUserMessage(content));
+                                        break;
+                                    case "assistant":
+                                        Messages.Add(new ChatRequestAssistantMessage(content));
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+
+                        // Construct requestOptions with the parsed messages
+                        requestOptions = new ChatCompletionsOptions(Env.MODEL_OPEN_AI, Messages);
+                    }
+                }
+
+
                 var response = await openai.GetChatCompletionsAsync(requestOptions);
 
                 // Extraire la réponse si elle est disponible
