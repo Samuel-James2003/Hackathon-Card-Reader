@@ -13,7 +13,7 @@ namespace Card_Reader_Api.Controllers
     public class CardController : ControllerBase
     {
         /// <summary>
-        /// 
+        /// Gets the pokemon card based on the name and ID 
         /// </summary>
         /// <param name="name">Pokemon name</param>
         /// <param name="number"> Pokemon Identification Number</param>
