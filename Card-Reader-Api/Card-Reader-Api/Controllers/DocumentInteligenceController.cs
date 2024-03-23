@@ -4,16 +4,16 @@ namespace Card_Reader_Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    public class DocumentInteligenceController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
-        private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ILogger<DocumentInteligenceController> _logger;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public DocumentInteligenceController(ILogger<DocumentInteligenceController> logger)
         {
             _logger = logger;
         }
