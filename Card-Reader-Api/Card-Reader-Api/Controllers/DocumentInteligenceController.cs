@@ -19,6 +19,7 @@ namespace Card_Reader_Api.Controllers
         {
             try
             {
+                Console.WriteLine(imageUrl);
                 if (string.IsNullOrEmpty(imageUrl))
                 {
                     return BadRequest("Image URL cannot be null or empty.");
@@ -33,6 +34,7 @@ namespace Card_Reader_Api.Controllers
                     {
                         using (Stream stream = await response.Content.ReadAsStreamAsync())
                         {
+                            Console.Write(imageUrl);
                             string modelId = "card-reader-model";
                             AnalyzeDocumentOperation operation = await client.AnalyzeDocumentAsync(WaitUntil.Completed, modelId, stream);
 
@@ -93,11 +95,11 @@ namespace Card_Reader_Api.Controllers
         }
 
         [HttpPost("GetCardDetailsLocal")]
-        public async Task<IActionResult> GetCardDetailsLocal(IFormFile file)
+        public async Task<DtoAnalysePokemon> GetCardDetailsLocal(IFormFile file)
         {
             if (file == null || file.Length == 0)
             {
-                return BadRequest("Please select a file.");
+                return null;
             }
 
             var credential = new AzureKeyCredential(Env.KEY_DOC_INTEL);
@@ -149,30 +151,23 @@ namespace Card_Reader_Api.Controllers
 
                 FormattedCardNumber = CardNumber.TrimStart('0').Split('/')[0];
 
-                string pokemonApiUrl = $"https://api.pokemontcg.io/v2/cards?q=name:{PokemonName}+number:{FormattedCardNumber}";
-                using (HttpClient httpClient = new HttpClient())
+                return new DtoAnalysePokemon
                 {
-                    using (HttpResponseMessage response = await httpClient.GetAsync(pokemonApiUrl))
-                    {
-                        if (response.IsSuccessStatusCode)
-                        {
-                            string result = await response.Content.ReadAsStringAsync();
-                            Console.WriteLine($"API Response: {result}");
-                            return Ok(result);
-                        }
-                        else
-                        {
-                            Console.WriteLine($"Error: {response.StatusCode}");
-                            return StatusCode((int)response.StatusCode);
-                        }
-                    }
-                }
+                    PokemonName = PokemonName,
+                    CardNumber = FormattedCardNumber
+                };
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return null;
             }
+        }
+
+        public class DtoAnalysePokemon
+        {
+            public string PokemonName { get; set; }
+            public string CardNumber { get; set; }
         }
     }
 }

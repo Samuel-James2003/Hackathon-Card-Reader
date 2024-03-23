@@ -2,36 +2,42 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 const ImageUploader: React.FC = () => {
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
-    const [url, setUrl] = useState<string>('');
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files[0]) {
-            setSelectedImage(URL.createObjectURL(event.target.files[0]));
+            setSelectedFile(event.target.files[0]);
         }
     };
-
 
     const handleSubmit = async () => {
-        try {
-            const response = await axios.post('http://localhost:5185/DocumentInteligence', {
-                param: url
-            });
-            console.log(response.data);
-        } catch (error) {
-            console.error(error);
+        if (selectedFile) {
+            const formData = new FormData();
+            formData.append('file', selectedFile); // Utilisez l'objet File directement
+
+            try {
+                const response = await axios.post('http://localhost:5185/DocumentIntelligence/GetCardDetailsLocal', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+                console.log(response.data);
+            } catch (error) {
+                console.error(error);
+            }
         }
     };
+
     return (
         <div>
             <h1>Upload and Display Image using React Hooks and TypeScript</h1>
 
-            {selectedImage && (
+            {selectedFile && (
                 <div>
                     <img
                         alt="Selected"
                         width={"250px"}
-                        src={selectedImage}
+                        src={URL.createObjectURL(selectedFile)}
                     />
                     <br />
                 </div>
@@ -45,13 +51,6 @@ const ImageUploader: React.FC = () => {
                 accept="image/*"
                 onChange={handleImageChange}
             />
-            <input
-                type="text"
-                placeholder="Enter URL"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-            />
-
             <button onClick={handleSubmit}>Submit</button>
         </div>
     );
