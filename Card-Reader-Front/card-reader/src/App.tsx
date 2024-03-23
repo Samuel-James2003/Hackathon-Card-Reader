@@ -1,11 +1,16 @@
 import React from 'react';
 import ImageUploader from './component/ImportImage';
+import { ImageResponseProvider } from './context/ImageResponseContext';
+import DisplayResponse from './component/DisplayResult';
 import './App.css';
 
 function App() {
   return (
     <div className="App">
-      <ImageUploader></ImageUploader>
+      <ImageResponseProvider>
+        <ImageUploader />
+        <DisplayResponse/>
+      </ImageResponseProvider>
     </div>
   );
 }
