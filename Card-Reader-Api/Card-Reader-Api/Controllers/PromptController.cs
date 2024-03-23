@@ -7,50 +7,77 @@ using System.Text;
 
 namespace Card_Reader_Api.Controllers
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class PromptController : ControllerBase
     {
-/*        [HttpGet(Name = "customGpt")]
-        public async Task<string> AskGpt(string content, string prompt, string system)
-        {
-            ChatModel chatModel = new();
-            chatModel.AddMessage(
-                new("system", system),
-                new("user", prompt),
-                new("user", content));
 
-            return await CallOpenAI(chatModel);
-        }*/
-
-        [HttpGet(Name = "test")]
-        public async Task<string> ConversationAnalysis(string prompt, string system)
+        /// <summary>
+        /// Sends a message to chatgpt
+        /// </summary>
+        /// <remarks>If the conversationHistory is null a system prompt is required </remarks>
+        /// <param name="conversationHistory"> Assuming the format of each message is "sender: content" </param>
+        /// <param name="prompt"> The user's question </param>
+        /// <param name="system"> The system prompt </param>
+        /// <returns> Returns chatgpt's response  </returns>
+        [HttpGet(Name = "ConversationAnalysis")]
+        public async Task<string> ConversationAnalysis(string? conversationHistory, string prompt, string? system)
         {
             try
             {
-                var openai  = new OpenAIClient(new Uri(Env.URL_OPEN_AI), new Azure.AzureKeyCredential(Env.KEY_OPEN_AI));
+                var openai = new OpenAIClient(new Uri(Env.URL_OPEN_AI), new Azure.AzureKeyCredential(Env.KEY_OPEN_AI));
 
-                string conversationHistory = ""; // Initialize a new string to hold the conversation history
-
-
-                // Append the conversation history to the prompt
-                prompt = $"{prompt}\n {conversationHistory}";
-                ChatRequestSystemMessage systemMessage = new(system) ;
-                ChatRequestUserMessage message = new ChatRequestUserMessage(prompt);
-                
-
-
-                // Paramètres de la requête
-                var requestOptions = new ChatCompletionsOptions
+                IList<ChatRequestMessage> Messages = [];
+                ChatCompletionsOptions requestOptions = new();
+                if (string.IsNullOrEmpty(conversationHistory))
                 {
-                    DeploymentName = "gpt4-003",
-                    Messages = { message,systemMessage },
-                    
-                    
-                };
-
-
-                // Envoyer la requête à Azure OpenAI
+                    ChatRequestSystemMessage systemMessage = new(system);
+                    ChatRequestUserMessage promptMessage = new(prompt);
+                    requestOptions = new ChatCompletionsOptions
+                    {
+                        DeploymentName = Env.MODEL_OPEN_AI,
+                        Messages = { systemMessage, promptMessage }
+                    };
+                }
+                else if (string.IsNullOrEmpty(system))
+                {
+                   
+                    if (!string.IsNullOrEmpty(conversationHistory))
+                    {
+                        string[] messages = conversationHistory.Split(';');
+                        foreach (string message in messages)
+                        {
+                           
+                            string[] parts = message.Split(':');
+                            if (parts.Length == 2)
+                            {
+                                string sender = parts[0].Trim();
+                                string content = parts[1].Trim();
+                                switch (sender.ToLower())
+                                {
+                                    case "system":
+                                        Messages.Add(new ChatRequestSystemMessage(content));
+                                        break;
+                                    case "user":
+                                        Messages.Add(new ChatRequestUserMessage(content));
+                                        break;
+                                    case "assistant":
+                                        Messages.Add(new ChatRequestAssistantMessage(content));
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                        Messages.Add(new ChatRequestUserMessage(prompt));
+                        // Construct requestOptions with the parsed messages
+                        requestOptions = new ChatCompletionsOptions(Env.MODEL_OPEN_AI, Messages);
+                    }
+                }
+                requestOptions.MaxTokens = 2000;
                 var response = await openai.GetChatCompletionsAsync(requestOptions);
                 // Extraire la réponse
                 var analysisResult = response.Value.Choices.FirstOrDefault()?.Message?.Content;
@@ -62,47 +89,6 @@ namespace Card_Reader_Api.Controllers
                 throw;
             }
         }
-
-
-        /*public static async Task<string> CallOpenAI(ChatModel messages)
-            {
-            var jsonPayloadBuilder = new JsonPayloadBuilder("gpt4-003");
-                messages.Messages.ForEach(chatModel => { jsonPayloadBuilder.AddMessage(chatModel.Role, chatModel.Content); });
-                string jsonPayload = jsonPayloadBuilder.BuildPayload();
-
-                using (HttpClient httpClient = new HttpClient())
-                {
-                    string url = Env.URL_OPEN_AI;
-                    string apiKey = Env.KEY_OPEN_AI;
-
-                    // Adding API-Key header
-                    httpClient.DefaultRequestHeaders.Add("api-key", apiKey);
-
-                    // Creating HTTP request
-                    HttpRequestMessage request = new(HttpMethod.Post, url)
-                    {
-                        Content = new StringContent(jsonPayload, Encoding.UTF8, "application/json")
-                    };
-
-                    // Sending HTTP request
-                    HttpResponseMessage response = await httpClient.SendAsync(request);
-
-                    // Processing the response
-                    if (response.IsSuccessStatusCode)
-                    {
-                        string responseBody = await response.Content.ReadAsStringAsync();
-                        var responseObject = System.Text.Json.JsonSerializer.Deserialize<Result>(responseBody);
-                        var firstChoice = responseObject?.choices.FirstOrDefault();
-                        if (firstChoice != null)
-                        {
-                            return firstChoice.message.content;
-                    }
-                }
-
-                    // Handling request errors
-                    return response.StatusCode.ToString();
-                }
-            }*/
     }
- }
+}
 

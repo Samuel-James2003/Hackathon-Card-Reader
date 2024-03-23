@@ -35,6 +35,7 @@ namespace Card_Reader_Api.Controllers
                         {
                             string modelId = "card-reader-model";
                             AnalyzeDocumentOperation operation = await client.AnalyzeDocumentAsync(WaitUntil.Completed, modelId, stream);
+
                             await operation.WaitForCompletionAsync();
 
                             AnalyzeResult result = operation.Value;
@@ -90,6 +91,7 @@ namespace Card_Reader_Api.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
         [HttpPost("GetCardDetailsLocal")]
         public async Task<IActionResult> GetCardDetailsLocal(IFormFile file)
         {
@@ -113,16 +115,13 @@ namespace Card_Reader_Api.Controllers
                     string modelId = "card-reader-model";
 
                     AnalyzeDocumentOperation operation = await client.AnalyzeDocumentAsync(WaitUntil.Completed, modelId, stream);
-                    // Attente de la complétion de l'opération
+                    
                     await operation.WaitForCompletionAsync();
 
-                    // Récupération des résultats
                     AnalyzeResult result = operation.Value;
 
-                    // Parcourir les documents analysés
                     foreach (var document in result.Documents)
                     {
-                        // Parcourir les champs du document
                         foreach (var fieldKvp in document.Fields)
                         {
                             var fieldName = fieldKvp.Key;
