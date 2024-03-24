@@ -19,4 +19,71 @@
     color: white; /* Text color for user messages */
     float: right; /* Align user messages to the right */
   }
+  .openai-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .centered-content {
+    text-align: center;
+  }
+  
+  .search-form {
+    margin-bottom: 20px;
+  }
+  
+  .search-form input[type="text"] {
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    width: 300px;
+  }
+  
+  .search-form button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    border: none;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-left: 10px;
+  }
+  
+  .search-form button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .error-message {
+    color: red;
+    margin-top: 10px;
+  }
+  
+  .deck-suggestion {
+    margin-top: 20px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #f9f9f9;
+  }
+  .search-response {
+    margin-top: 20px;
+    border: 2px solid #c9aeae;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #daf5f9;
+  }
+  
+  .deck-suggestion h3 {
+    margin-top: 0;
+    color: #007bff;
+  }
+  .search-response h3 {
+    margin-top: 0;
+    color: #007bff;
+  }
   

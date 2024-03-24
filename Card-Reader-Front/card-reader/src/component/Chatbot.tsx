@@ -2731,7 +2731,7 @@ Total Cards - 60
               placeholder="Search for a Pokemon..."
             />
             {newestMessage && (
-              <div className="deck-suggestion">
+              <div className="search-response">
                 <h3>Response</h3>
                 <p>{newestMessage.content}</p>
               </div>
