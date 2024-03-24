@@ -41,7 +41,7 @@ const ImageUploader: React.FC = () => {
 
     return (
         <div>
-            <h1>Upload and Display Image using React Hooks and TypeScript</h1>
+            <h1>Jason R34 analyser</h1>
 
             {selectedFile && (
                 <div>
