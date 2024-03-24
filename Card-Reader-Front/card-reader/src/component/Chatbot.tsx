@@ -163,7 +163,22 @@ const OpenAIRequest = () => {
             {loading ? "Loading..." : "Send"}
           </button>
         </form>
+        <form onSubmit={handleSubmit}>
+        <input
+            type="text"
+            value={inputMessage}
+            onChange={handleChange}
+            placeholder="Type your message..."
+          />
+          <button
+            type="submit"
+            aria-label="Create Deck"
+            disabled={loading || !inputMessage}
+          >
+            {loading ? 'Loading...' : 'Send'}
+            </button>
         {error && <p className="error-message">{error}</p>}
+        </form>
       </div>
     </div>
   );
