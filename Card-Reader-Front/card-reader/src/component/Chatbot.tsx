@@ -122,10 +122,11 @@ const OpenAIRequest = () => {
   };
 
   const askDeck = () => {
+    let History: chatMessage[];
     const handleFileRead = (event: ProgressEvent<FileReader>) => {
       const content = event.target?.result as string;
       console.log(content);
-      let History: chatMessage[] = [
+      History = [
         {
           content:
             "Recherche dans les decks que je vais te donner, redonne moi le deck en entier qui comprends ce pokémon",
@@ -137,8 +138,20 @@ const OpenAIRequest = () => {
           role: "user",
         },
       ];
-    };
+      try {
+        let url = "http://localhost:5185/Prompt/ConversationAnalysis";
+        const formData = new FormData();
+      let str: string = "";
+      History.forEach((chatMessage: any) => {
+        str += chatMessage.role + ": " + chatMessage.content + ";\n";
+        console.log("str :", str);
+      });
+      formData.append("conversationHistory",str);
+    } catch (error) {
+      console.error(error);
+    }
   };
+};
 
   return (
     <div className="openai-container">
