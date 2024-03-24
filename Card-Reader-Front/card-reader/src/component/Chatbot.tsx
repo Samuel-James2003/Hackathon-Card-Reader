@@ -177,8 +177,8 @@ const OpenAIRequest = () => {
           >
             {loading ? 'Loading...' : 'Send'}
             </button>
-        {error && <p className="error-message">{error}</p>}
         </form>
+        {error && <p className="error-message">{error}</p>}
       </div>
     </div>
   );
