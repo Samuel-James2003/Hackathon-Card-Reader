@@ -11,7 +11,9 @@ interface chatMessage {
 
 const OpenAIRequest = () => {
   const [messageHistory, setMessageHistory] = useState<chatMessage[]>([]);
+  const [newestMessage, setNewestMessage] = useState<chatMessage>();
   const [loading, setLoading] = useState<boolean>(false);
+  const [loadingAskDeck, setLoadingAskDeck] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [inputMessage, setInputMessage] = useState<string>("");
   const [deckSuggestion, setDeckSuggestion] = useState<string>("");
@@ -20,7 +22,6 @@ const OpenAIRequest = () => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputMessage(event.target.value);
   };
-
 
   const handleMessageContext = async () => {
     try {
@@ -66,7 +67,6 @@ const OpenAIRequest = () => {
         str += chatMessage.role + ": " + chatMessage.content + ";\n";
         console.log("str :", str);
       });
-      console.log("inputMessage :", inputMessage);
       messageHistory.push({
         role: "user",
         content: inputMessage,
@@ -88,6 +88,10 @@ const OpenAIRequest = () => {
 
       const responseData = response.data;
       console.log(responseData);
+      setNewestMessage({
+        role: "assistant",
+        content: responseData,
+      });
 
       setMessageHistory([
         ...Messages,
@@ -104,24 +108,8 @@ const OpenAIRequest = () => {
     }
   };
 
-  const showChat = (message: chatMessage) => {
-    if (message.role === "assistant") {
-      return (
-        <>
-          <div className="chatBubble assistant">{message.content}</div>
-        </>
-      );
-    }
-    if (message.role === "user") {
-      return (
-        <>
-          <div className="chatBubble user">{message.content}</div>
-        </>
-      );
-    }
-  };
-
-  const askDeck = async (event: React.FormEvent<HTMLFormElement>) => {
+  const askDeck = async (event: React.FormEvent<HTMLButtonElement>) => {
+    setLoadingAskDeck(true);
     event.preventDefault();
     let History: chatMessage[];
     const content = `Beheeyem Silvally
@@ -2711,7 +2699,9 @@ Total Cards - 60
       });
       formData.append(
         "prompt",
-        "Voici mon pokemon : " + responseData?.pokemonName
+        "Voici mon pokemon : " +
+          responseData?.pokemonName +
+          responseData?.formatNumber
       );
       formData.append("conversationHistory", str);
       const response = await axios.post(url, formData, {
@@ -2724,42 +2714,52 @@ Total Cards - 60
       console.log(dataResponse);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoadingAskDeck(false);
     }
   };
 
   return (
     <div className="openai-container">
       <div className="centered-content">
-        <div className="message-history">
-          {messageHistory.map((message: chatMessage, index: any) => (
-            <p key={index}>{showChat(message)}</p>
-          ))}
-        </div>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            value={inputMessage}
-            onChange={handleChange}
-            placeholder="Type your message..."
-          />
-          <button
-            type="submit"
-            aria-label="Send Message"
-            disabled={loading || !inputMessage}
-          >
-            {loading ? "Loading..." : "Send"}
-          </button>
-        </form>
-        <form onSubmit={askDeck}>
-          <button type="submit" aria-label="Create Deck">
-            {loading ? "Loading..." : "Create Deck"}
-          </button>
-
-          {error && <p className="error-message">{error}</p>}
-        </form>
         <div>
-        {deckSuggestion || 'No suggestion available'}
-      </div>
+          <form onSubmit={handleSubmit} className="search-form">
+            <input
+              type="text"
+              value={inputMessage}
+              onChange={handleChange}
+              placeholder="Search for a Pokemon..."
+            />
+            {newestMessage && (
+              <div className="deck-suggestion">
+                <h3>Response</h3>
+                <p>{newestMessage.content}</p>
+              </div>
+            )}
+            <button
+              type="submit"
+              aria-label="Search"
+              disabled={loading || !inputMessage}
+            >
+              {loading ? "Loading..." : "Search"}
+            </button>
+          </form>
+          {error && <p className="error-message">{error}</p>}
+        </div>
+        <button
+          type="submit"
+          aria-label="Search"
+          disabled={loadingAskDeck}
+          onClick={askDeck}
+        >
+          {loadingAskDeck ? "Loading..." : "Ask deck"}
+        </button>
+        {deckSuggestion && (
+          <div className="deck-suggestion">
+            <h3>Deck Suggestion</h3>
+            <p>{deckSuggestion}</p>
+          </div>
+        )}
       </div>
     </div>
   );
