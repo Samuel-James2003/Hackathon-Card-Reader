@@ -11,6 +11,9 @@ using Newtonsoft.Json;
 
 namespace Card_Reader_Api.Controllers
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class DocumentIntelligenceController : ControllerBase
@@ -172,7 +175,9 @@ namespace Card_Reader_Api.Controllers
             }
         }
     }
-
+    /// <summary>
+    /// 
+    /// </summary>
     public class DtoAnalysePokemon
     {
         public string PokemonName { get; set; }

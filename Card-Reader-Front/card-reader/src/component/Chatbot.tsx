@@ -111,15 +111,6 @@ const OpenAIRequest = () => {
       setLoading(false);
     }
   };
-  useEffect(() => {
-    scrollToBottom();
-  }, [messageHistory]);
-
-  const scrollToBottom = () => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-    }
-  };
 
   const showChat = (message:chatMessage) => {
     if (message.role === "assistant") {
