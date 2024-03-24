@@ -104,80 +104,91 @@ namespace Card_Reader_Api.Controllers
         [HttpPost("GetCardDetailsLocal")]
         public async Task<DtoAnalysePokemon> GetCardDetailsLocal(IFormFile file)
         {
+            if (file == null || file.Length == 0)
+            {
+                return null;
+            }
             try
             {
-                if (file == null || file.Length == 0)
+                return await GetCardDetails(file, "card-reader-model");
+            }
+            catch (Exception)
+            {
+                try
+                {
+                    return await GetCardDetails(file, "card-reader-model-right");
+                }
+                catch (Exception)
                 {
                     return null;
                 }
+            }
+        }
 
-                var credential = new AzureKeyCredential(Env.KEY_DOC_INTEL);
-                var client = new DocumentAnalysisClient(new Uri(Env.URL_DOC_INTEL), credential);
+        private static async Task<DtoAnalysePokemon> GetCardDetails(IFormFile file, string model)
+        {
+            var credential = new AzureKeyCredential(Env.KEY_DOC_INTEL);
+            var client = new DocumentAnalysisClient(new Uri(Env.URL_DOC_INTEL), credential);
 
-                using (HttpClient httpClient = new HttpClient())
+            using (HttpClient httpClient = new HttpClient())
+            {
+                using (Stream stream = file.OpenReadStream())
                 {
-                    using (Stream stream = file.OpenReadStream())
+                    string modelId = model;
+                    AnalyzeDocumentOperation operation = await client.AnalyzeDocumentAsync(WaitUntil.Completed, modelId, stream);
+                    await operation.WaitForCompletionAsync();
+                    AnalyzeResult result = operation.Value;
+
+                    string PokemonName = "";
+                    string CardCode = "";
+                    string CardNumber = "";
+                    string FormattedCardNumber = "";
+
+                    foreach (var document in result.Documents)
                     {
-                        string modelId = "card-reader-model";
-                        AnalyzeDocumentOperation operation = await client.AnalyzeDocumentAsync(WaitUntil.Completed, modelId, stream);
-                        await operation.WaitForCompletionAsync();
-                        AnalyzeResult result = operation.Value;
-
-                        string PokemonName = "";
-                        string CardCode = "";
-                        string CardNumber = "";
-                        string FormattedCardNumber = "";
-
-                        foreach (var document in result.Documents)
+                        foreach (var fieldKvp in document.Fields)
                         {
-                            foreach (var fieldKvp in document.Fields)
-                            {
-                                var fieldName = fieldKvp.Key;
-                                var fieldValue = fieldKvp.Value;
+                            var fieldName = fieldKvp.Key;
+                            var fieldValue = fieldKvp.Value;
 
-                                if (fieldName == "Pokemon name")
-                                {
-                                    PokemonName = fieldValue.Content;
-                                }
-                                else if (fieldName == "Card code")
-                                {
-                                    CardCode = fieldValue.Content;
-                                }
-                                else if (fieldName == "Card Number")
-                                {
-                                    CardNumber = fieldValue.Content;
-                                }
+                            if (fieldName == "Pokemon name")
+                            {
+                                PokemonName = fieldValue.Content;
                             }
-                        }
-
-                        string jsonName = $"https://tyradex.tech/api/v1/pokemon/{PokemonName}";
-                        using (HttpResponseMessage responseTranslated = await httpClient.GetAsync(jsonName))
-                        {
-                            if (responseTranslated.IsSuccessStatusCode)
+                            else if (fieldName == "Card code")
                             {
-                                string resultContent = await responseTranslated.Content.ReadAsStringAsync();
-                                dynamic pokemonNameTranslated = JsonConvert.DeserializeObject(resultContent);
-                                string nameTranslated = pokemonNameTranslated.name.en.ToString();
-                                FormattedCardNumber = CardNumber.TrimStart('0').Split('/')[0];
-
-                                return new DtoAnalysePokemon
-                                {
-                                    PokemonName = nameTranslated,
-                                    CardNumber = CardNumber,
-                                    FormatNumber = FormattedCardNumber
-                                };
+                                CardCode = fieldValue.Content;
                             }
-                            else
+                            else if (fieldName == "Card Number")
                             {
-                                return null;
+                                CardNumber = fieldValue.Content;
                             }
                         }
                     }
+
+                    string jsonName = $"https://tyradex.tech/api/v1/pokemon/{PokemonName}";
+                    using (HttpResponseMessage responseTranslated = await httpClient.GetAsync(jsonName))
+                    {
+                        if (responseTranslated.IsSuccessStatusCode)
+                        {
+                            string resultContent = await responseTranslated.Content.ReadAsStringAsync();
+                            dynamic pokemonNameTranslated = JsonConvert.DeserializeObject(resultContent);
+                            string nameTranslated = pokemonNameTranslated.name.en.ToString();
+                            FormattedCardNumber = CardNumber.TrimStart('0').Split('/')[0];
+
+                            return new DtoAnalysePokemon
+                            {
+                                PokemonName = nameTranslated,
+                                CardNumber = CardNumber,
+                                FormatNumber = FormattedCardNumber
+                            };
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                return null;
             }
         }
     }
