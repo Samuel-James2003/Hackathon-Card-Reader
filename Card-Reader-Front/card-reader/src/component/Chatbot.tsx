@@ -2728,7 +2728,7 @@ Total Cards - 60
               type="text"
               value={inputMessage}
               onChange={handleChange}
-              placeholder="Search for a Pokemon..."
+              placeholder="Ask me something about this card..."
             />
             {newestMessage && (
               <div className="deck-suggestion">

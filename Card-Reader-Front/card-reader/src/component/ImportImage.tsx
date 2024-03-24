@@ -41,7 +41,7 @@ const ImageUploader: React.FC = () => {
 
     return (
         <div>
-            <h1>Jason R34 analyser</h1>
+            <h1>Pokemon Card Analyzer</h1>
 
             {selectedFile && (
                 <div>
