@@ -11,18 +11,16 @@ using Newtonsoft.Json;
 
 namespace Card_Reader_Api.Controllers
 {
-    /// <summary>
-    /// 
-    /// </summary>
+    /// <summary></summary>
     [ApiController]
     [Route("[controller]")]
     public class DocumentIntelligenceController : ControllerBase
     {
         /// <summary>
-        /// 
+        /// Get card details based on the url of a card 
         /// </summary>
-        /// <param name="imageUrl"></param>
-        /// <returns></returns>
+        /// <param name="imageUrl">The url of the card</param>
+        /// <returns>The pokemon Identifiaction number and pokemon name</returns>
         [HttpGet(Name = "GetCardDetailsPost")]
         public async Task<IActionResult> GetCardDetailsPost([FromQuery] string imageUrl)
         {
@@ -100,13 +98,17 @@ namespace Card_Reader_Api.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
+        /// <summary>
+        /// Get card details based on the url of a card
+        /// </summary>
+        /// <param name="file">Image file </param>
+        /// <returns>he pokemon Identifiaction number and pokemon name</returns>
         [HttpPost("GetCardDetailsLocal")]
         public async Task<DtoAnalysePokemon> GetCardDetailsLocal(IFormFile file)
         {
             if (file == null || file.Length == 0)
             {
-                return null;
+                return new DtoAnalysePokemon();
             }
             try
             {
@@ -120,7 +122,7 @@ namespace Card_Reader_Api.Controllers
                 }
                 catch (Exception)
                 {
-                    return null;
+                    return new DtoAnalysePokemon();
                 }
             }
         }
@@ -185,16 +187,14 @@ namespace Card_Reader_Api.Controllers
                         }
                         else
                         {
-                            return null;
+                            return new DtoAnalysePokemon();
                         }
                     }
                 }
             }
         }
     }
-    /// <summary>
-    /// 
-    /// </summary>
+    /// <summary/>
     public class DtoAnalysePokemon
     {
         public string PokemonName { get; set; }
