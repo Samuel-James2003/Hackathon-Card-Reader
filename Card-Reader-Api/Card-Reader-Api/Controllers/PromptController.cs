@@ -25,7 +25,7 @@ namespace Card_Reader_Api.Controllers
         /// <param name="system"> The system prompt </param>
         /// <returns> Returns chatgpt's response  </returns>
         [HttpPost("ConversationAnalysis")]
-        public async Task<string> ConversationAnalysis([FromForm(Name ="conversationHistory")]string? conversationHistory,[FromForm(Name = "prompt")] string prompt, [FromForm(Name ="system")] string? system)
+        public async Task<string> ConversationAnalysis([FromForm(Name = "conversationHistory")] string? conversationHistory, [FromForm(Name = "prompt")] string prompt, [FromForm(Name = "system")] string? system)
         {
             try
             {
@@ -33,8 +33,8 @@ namespace Card_Reader_Api.Controllers
                 Console.WriteLine(conversationHistory);
                 IList<ChatRequestMessage> Messages = [];
                 ChatCompletionsOptions requestOptions = new();
-                
-                
+
+
                 if (string.IsNullOrEmpty(conversationHistory))
                 {
                     ChatRequestSystemMessage systemMessage = new(system);
@@ -47,18 +47,40 @@ namespace Card_Reader_Api.Controllers
                 }
                 else if (string.IsNullOrEmpty(system))
                 {
-                   
+
                     if (!string.IsNullOrEmpty(conversationHistory))
                     {
                         string[] messages = conversationHistory.Split(';');
                         foreach (string message in messages)
                         {
-                           
+
                             string[] parts = message.Split(':');
                             if (parts.Length == 2)
                             {
                                 string sender = parts[0].Trim();
                                 string content = parts[1].Trim();
+                                switch (sender.ToLower())
+                                {
+                                    case "system":
+                                        Messages.Add(new ChatRequestSystemMessage(content));
+                                        break;
+                                    case "user":
+                                        Messages.Add(new ChatRequestUserMessage(content));
+                                        break;
+                                    case "assistant":
+                                        Messages.Add(new ChatRequestAssistantMessage(content));
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                            else if (parts.Length > 2)
+                            {
+                                var first = parts[0].Trim();
+                                var second = parts.Skip(1).Take(parts.Length - 1);
+                                string concatenatedString = string.Join("", second);
+                                string sender = first;
+                                string content = concatenatedString.Trim();
                                 switch (sender.ToLower())
                                 {
                                     case "system":
