@@ -18,6 +18,12 @@ namespace Card_Reader_Api.Controllers
     [Route("[controller]")]
     public class DocumentIntelligenceController : ControllerBase
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="imageUrl"></param>
+        /// <returns></returns>
+        [HttpGet(Name = "GetCardDetailsPost")]
         public async Task<IActionResult> GetCardDetailsPost([FromQuery] string imageUrl)
         {
             try

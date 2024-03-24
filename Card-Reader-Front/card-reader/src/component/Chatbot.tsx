@@ -1,6 +1,7 @@
 
 import React, { useState, useContext } from 'react';
 import '../index.css';
+import '../styles/chat.css';
 import axios from 'axios';
 import { ImageResponseContext } from '../context/ImageResponseContext';
 
